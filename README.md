@@ -3,6 +3,27 @@ Conceptual hybrid nuclear thermal propulsion (NTP) architectures for affordable,
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/infinityabundance/EANTR-ARENTP-SFNTR/blob/main/crates/ntp-hybrids-sim/ntp-hybrids-sim-visualization.ipynb)
 
+## Overview
+
+This repository turns the paper's three conceptual hybrid nuclear thermal propulsion ideas into a runnable analysis workflow. The Rust crate in `crates/ntp-hybrids-sim` computes paper-aligned mission metrics such as effective specific impulse, propellant mass fraction, variable-mode phase behavior, uncertainty bands, and simplified transit-time estimates for `EANTR`, `ARENTP`, and `SF-NTR`, while the Google Colab notebook provides a browser-based way to compile the crate, run the same simulations, inspect the generated CSV outputs, and visualize the results without requiring a local Rust setup. Together they make the paper reproducible, inspectable, and easier to evaluate beyond the static text of the manuscript.
+
+## Quick Start
+
+### Rust crate
+
+Run the simulator locally from the crate directory:
+
+```bash
+cd crates/ntp-hybrids-sim
+cargo run -- --hybrid EANTR --dv 5500 --runs 360
+```
+
+This writes CSV outputs and summary statistics into `output-ntp-hybrids-sim/YYYY-MM-DD_HH-MM-SS/` at the repository root so each run is preserved.
+
+### Google Colab
+
+Open the notebook with the Colab button above, run the setup cells, choose a hybrid from the dropdown, and execute the simulation cells. The notebook installs Rust if needed, builds the crate, runs the same command-line workflow under the hood, and saves plots plus CSV outputs into the same dated `output-ntp-hybrids-sim` folder structure inside the Colab workspace.
+
 ## Paper
 
 Source paper:
