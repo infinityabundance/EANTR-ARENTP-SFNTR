@@ -1,0 +1,12 @@
+[package]
+name = "ntp-hybrids-sim"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+nalgebra = "0.33"
+uom = { version = "0.35", features = ["f64", "si"] }
+statrs = "0.18"
+clap = { version = "4.5", features = ["derive"] }
+rand = "0.9"
+chrono = "0.4"
