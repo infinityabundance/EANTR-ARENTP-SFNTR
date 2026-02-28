@@ -2,6 +2,16 @@
 name = "ntp-hybrids-sim"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.85"
+description = "Conceptual Mars mission simulator for EANTR, ARENTP, and SF-NTR hybrid nuclear thermal propulsion."
+license = "Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/infinityabundance/EANTR-ARENTP-SFNTR"
+homepage = "https://github.com/infinityabundance/EANTR-ARENTP-SFNTR"
+documentation = "https://docs.rs/ntp-hybrids-sim"
+keywords = ["mars", "nuclear", "propulsion", "simulation", "rocket"]
+categories = ["command-line-utilities", "science", "simulation"]
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE"]
 
 [dependencies]
 nalgebra = "0.33"
