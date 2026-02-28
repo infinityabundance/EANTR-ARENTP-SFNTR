@@ -74,6 +74,65 @@ It does not include:
 
 The outputs are conceptual estimates meant to support inspection, comparison, and visualization of the paper's ideas.
 
+## How The Rust Crate Works
+
+The Rust crate lives in `crates/ntp-hybrids-sim` and acts as the reproducible batch-analysis engine for the repository.
+
+At a code level, it works in a fixed sequence:
+
+1. It parses CLI inputs with `clap`, primarily the selected hybrid, mission delta-v, and Monte Carlo run count.
+2. It builds a dated output directory under `output-ntp-hybrids-sim/YYYY-MM-DD_HH-MM-SS` so each run is isolated.
+3. It selects the requested propulsion concept (`EANTR`, `ARENTP`, `SF-NTR`, or all three).
+4. For each concept, it constructs paper-aligned mechanism parameters:
+   - `EANTR`: ionization fraction, electrostatic grid voltage, stage count, and acceleration efficiency.
+   - `ARENTP`: acoustic frequency and heat-transfer gain.
+   - `SF-NTR`: chamber pressure, methane blend fraction, and supercritical heat-transfer gain.
+5. It evaluates a variable-mode mission profile with phase-specific behavior for trans-Mars injection, heliocentric cruise, and Mars-orbit capture.
+6. It computes concept outputs using the simplified models described in the paper:
+   - Tsiolkovsky mass ratio,
+   - hydrogen `sqrt(T/M)` Isp scaling where applicable,
+   - paper-aligned effective-Isp models for each hybrid,
+   - mission propellant mass fraction,
+   - and phase-level transit-time estimates.
+7. It performs an exactly `360`-run Monte Carlo study per hybrid to sample the main conceptual uncertainty drivers.
+8. It writes multiple CSV artifacts so the results can be inspected outside the terminal.
+
+Those CSV outputs are intentionally split by purpose:
+
+- `summary.csv`: paper-facing mission summary values and comparison bands.
+- `isp_sweep_<hybrid>.csv`: raw rocket-equation sensitivity to Isp.
+- `mechanism_sweep_<hybrid>.csv`: sensitivity to the primary hybrid-specific mechanism parameter.
+- `monte_carlo_<hybrid>.csv`: uncertainty-study output for the 360 sampled runs.
+- `thrust_profile_<hybrid>.csv`: the phase-by-phase mission profile used for the selected concept.
+
+The Rust crate is the authoritative computation layer. Everything else in the repository builds on those generated outputs.
+
+## How The Colab Notebook Works
+
+The Colab notebook lives at `crates/ntp-hybrids-sim/ntp-hybrids-sim-visualization.ipynb` and acts as the interactive visualization layer on top of the Rust crate.
+
+Its workflow is:
+
+1. Bootstrap the environment:
+   - detect whether the repository already exists under `/content`,
+   - clone the repository from GitHub if it does not,
+   - install Rust if `cargo` is missing,
+   - and install the Python plotting dependencies used for visualization.
+2. Build the Rust crate directly in Colab.
+3. Let the user choose a hybrid and delta-v value from notebook widgets.
+4. Run the same CLI command the crate expects, so the notebook is not using a separate shadow implementation.
+5. Load the generated CSV outputs from the dated output folder.
+6. Render the paper-facing plots:
+   - mass fraction versus Isp,
+   - mechanism-driver versus effective Isp,
+   - Monte Carlo propellant mass fraction distribution,
+   - transit time histogram,
+   - and a phase-by-phase mission profile.
+7. Display compact summary tables instead of raw wide dataframe dumps, so the key mission and paper-comparison values remain readable in Colab.
+8. Save the plots back into the same dated output folder as the CSVs.
+
+This notebook exists so someone can inspect the model quickly, visually, and reproducibly without needing a local Rust development setup.
+
 ## Repository Layout
 
 The main simulation assets live here:

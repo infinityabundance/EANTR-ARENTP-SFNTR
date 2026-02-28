@@ -74,6 +74,60 @@ It does not include:
 
 The results are conceptual estimates for comparison and visualization, not flight-certified performance predictions.
 
+## How The Rust Crate Works
+
+The crate operates as a command-line batch workflow with a fixed sequence:
+
+1. Parse inputs with `clap`.
+   - `--hybrid` selects `EANTR`, `ARENTP`, `SF-NTR`, or `all`.
+   - `--dv` sets the mission delta-v in m/s.
+   - `--runs` is fixed to the paper's `360` Monte Carlo runs per hybrid.
+2. Create a dated output directory under `output-ntp-hybrids-sim/YYYY-MM-DD_HH-MM-SS`.
+3. Build the concept-specific mechanism parameters for the selected hybrid.
+4. Simulate a variable-mode mission profile across:
+   - trans-Mars injection,
+   - heliocentric cruise,
+   - and Mars-orbit capture.
+5. Evaluate the simplified propulsion model using:
+   - the Tsiolkovsky rocket equation,
+   - hydrogen `sqrt(T/M)` scaling where appropriate,
+   - paper-aligned effective-Isp calculations for each concept,
+   - and phase-level transit-time estimates.
+6. Run an exactly `360`-sample Monte Carlo analysis that perturbs the main conceptual mechanism variables.
+7. Write the resulting CSV files for later plotting, inspection, or downstream analysis.
+
+The concept logic differs by hybrid:
+
+- `EANTR` uses ionization fraction, electrostatic grid voltage, stage count, and acceleration efficiency to model augmented cruise behavior.
+- `ARENTP` uses acoustic frequency and heat-transfer gain to model resonance-enhanced performance.
+- `SF-NTR` uses chamber pressure, methane blend fraction, and supercritical heat-transfer gain to model high-pressure supercritical operation.
+
+The crate is therefore not just producing one headline number. It is generating multiple views of the same conceptual trade study:
+
+- a nominal mission summary,
+- an Isp sensitivity sweep,
+- a hybrid-specific mechanism sweep,
+- a Monte Carlo uncertainty study,
+- and a phase-by-phase thrust profile.
+
+## How The Colab Notebook Works
+
+The companion notebook uses the Rust crate directly rather than reimplementing the simulation in Python.
+
+Its workflow is:
+
+1. Ensure the repository exists in the Colab runtime, cloning it automatically if needed.
+2. Install Rust if `cargo` is not already available.
+3. Install Python plotting dependencies such as `pandas`, `matplotlib`, and `ipywidgets`.
+4. Build the Rust crate in the notebook environment.
+5. Expose widget controls so the user can choose the hybrid and mission delta-v.
+6. Run the same CLI command the crate expects.
+7. Load the CSV files produced by the crate.
+8. Render visual outputs and compact summary tables for the key paper-facing metrics.
+9. Save plots into the same dated output directory as the CSV files.
+
+This matters because the notebook is purely a visualization and execution shell around the crate. The source of truth for the actual analysis remains the Rust code.
+
 ## Running The CLI
 
 From this crate directory:
